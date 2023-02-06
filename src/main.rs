@@ -37,11 +37,11 @@ async fn handle_connection(stream: TcpStream, db: Arc<Db>) -> Result<(), ()> {
         if let Some(msg) = connection.read_message().await? {
             println!("Message: {:?}", msg);
 
-            let command = command::CommandType::try_from(msg);
+            let command = command::from_resp(&msg);
             println!("Command: {:?}", command);
 
             if let Ok(command) = command {
-                db.run_command(&command);
+                db.run_command(command.as_ref());
             }
         } else {
             return Ok(());

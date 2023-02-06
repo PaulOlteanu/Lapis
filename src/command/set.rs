@@ -1,16 +1,21 @@
+use lapis_resp::RespType;
+
 use crate::db::Command;
 
+#[derive(Debug)]
 pub enum Conditional {
     Nx,
     Xx,
 }
 
+#[derive(Debug)]
 pub enum Expiry {
     Ex,
     Px,
     Exat,
 }
 
+#[derive(Debug)]
 pub struct Set {
     key: String,
     value: String,
@@ -59,11 +64,11 @@ impl Set {
 }
 
 impl Command for Set {
-    fn execute(&self, db: &crate::db::Db) -> Result<(), ()> {
+    fn execute(&self, db: &crate::db::Db) -> Result<Option<RespType>, ()> {
         if let Ok(mut map) = db.map.lock() {
             map.insert(self.key.clone(), self.value.clone());
         }
 
-        Ok(())
+        Ok(None)
     }
 }
