@@ -1,5 +1,4 @@
 use std::{
-    borrow::BorrowMut,
     net::{Ipv4Addr, SocketAddrV4},
     sync::Arc,
 };
@@ -9,13 +8,12 @@ use tokio::net::{TcpListener, TcpStream};
 mod command;
 mod connection;
 mod db;
-mod resp;
 
-use crate::db::{Command, Db};
+use crate::db::Db;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let mut db = Arc::new(Db::new());
+    let db = Arc::new(Db::new());
 
     let address = SocketAddrV4::new(Ipv4Addr::new(127, 0, 0, 1), 3232);
 
@@ -38,6 +36,7 @@ async fn handle_connection(stream: TcpStream, db: Arc<Db>) -> Result<(), ()> {
     loop {
         if let Some(msg) = connection.read_message().await? {
             println!("Message: {:?}", msg);
+
             let command = command::CommandType::try_from(msg);
             println!("Command: {:?}", command);
 

@@ -1,6 +1,5 @@
 use enum_dispatch::enum_dispatch;
-
-use crate::resp::{Array, BulkString, Type};
+use lapis_resp::RespType;
 
 pub mod set;
 
@@ -12,34 +11,34 @@ pub enum CommandType {
     Set,
 }
 
-fn get_arg(arg: &Type) -> Option<&str> {
-    if let Type::BulkString(BulkString(s)) = arg {
+fn get_arg(arg: &RespType) -> Option<&str> {
+    if let RespType::BulkString(Some(s)) = arg {
         Some(s.as_str())
     } else {
         None
     }
 }
 
-impl TryFrom<Type> for CommandType {
+impl TryFrom<RespType> for CommandType {
     type Error = ();
 
-    fn try_from(value: Type) -> Result<Self, Self::Error> {
-        if let Type::Array(Array(arr)) = value {
-            if arr.len() < 1 {
+    fn try_from(value: RespType) -> Result<Self, Self::Error> {
+        if let RespType::Array(Some(arr)) = value {
+            if arr.is_empty() {
                 return Err(());
             }
 
             let mut unwrapped = Vec::new();
 
             for val in arr.iter() {
-                if let Type::BulkString(BulkString(val)) = val {
+                if let RespType::BulkString(Some(val)) = val {
                     unwrapped.push(val.as_str());
                 } else {
                     return Err(());
                 }
             }
 
-            if unwrapped.len() < 1 {
+            if unwrapped.is_empty() {
                 return Err(());
             }
 

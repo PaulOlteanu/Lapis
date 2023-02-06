@@ -3,7 +3,7 @@ use std::io::ErrorKind;
 use bytes::{Buf, BytesMut};
 use tokio::{io::AsyncReadExt, net::TcpStream};
 
-use crate::resp::Type;
+use lapis_resp::RespType;
 
 pub struct Connection {
     stream: TcpStream,
@@ -18,7 +18,7 @@ impl Connection {
         }
     }
 
-    pub async fn read_message(&mut self) -> Result<Option<Type>, ()> {
+    pub async fn read_message(&mut self) -> Result<Option<RespType>, ()> {
         loop {
             println!("Read loop");
 
@@ -27,11 +27,11 @@ impl Connection {
                     println!("Read {} bytes", read);
 
                     let as_str = std::str::from_utf8(&self.buffer).or(Err(()))?;
-                    let res = Type::parse(as_str);
-
-                    if let Some((msg, advance)) = res {
-                        self.buffer.advance(advance);
-                        return Ok(Some(msg));
+                    if let Some(byte_length) = lapis_resp::byte_length(as_str) {
+                        if let Ok(res) = RespType::from_str(as_str) {
+                            self.buffer.advance(byte_length);
+                            return Ok(Some(res));
+                        }
                     }
 
                     if read == 0 {
