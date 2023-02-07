@@ -1,7 +1,10 @@
 use std::io::ErrorKind;
 
 use bytes::{Buf, BytesMut};
-use tokio::{io::AsyncReadExt, net::TcpStream};
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpStream,
+};
 
 use lapis_resp::RespType;
 
@@ -49,5 +52,12 @@ impl Connection {
                 },
             }
         }
+    }
+
+    pub async fn send_message(&mut self, message: RespType) -> Result<(), ()> {
+        self.stream
+            .write_all(message.to_string().as_bytes())
+            .await
+            .or(Err(()))
     }
 }

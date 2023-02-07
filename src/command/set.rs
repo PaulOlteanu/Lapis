@@ -69,6 +69,6 @@ impl Command for Set {
             map.insert(self.key.clone(), self.value.clone());
         }
 
-        Ok(None)
+        Ok(Some(RespType::SimpleString("OK".to_string())))
     }
 }

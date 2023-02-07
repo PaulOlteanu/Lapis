@@ -25,6 +25,27 @@ impl RespType {
     }
 }
 
+impl std::fmt::Display for RespType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::SimpleString(val) => write!(f, "+{}\r\n", val)?,
+            Self::Error(val) => write!(f, "-{}\r\n", val)?,
+            Self::Integer(val) => write!(f, ":{}\r\n", val)?,
+            Self::BulkString(None) => write!(f, "$0\r\n\r\n")?,
+            Self::Array(None) => write!(f, "*0\r\n")?,
+            Self::BulkString(Some(val)) => write!(f, "${}\r\n{}\r\n", val.len(), val)?,
+            Self::Array(Some(arr)) => {
+                write!(f, "*{}\r\n", arr.len())?;
+
+                for val in arr {
+                    write!(f, "{}", val)?
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
 struct Parser<'a> {
     s: &'a str,
 }

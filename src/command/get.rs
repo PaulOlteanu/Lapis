@@ -24,7 +24,8 @@ impl Get {
 impl Command for Get {
     fn execute(&self, db: &crate::db::Db) -> Result<Option<RespType>, ()> {
         if let Ok(map) = db.map.lock() {
-            map.get(&self.key);
+            let val = map.get(&self.key);
+            return Ok(Some(RespType::BulkString(val.cloned())));
         }
 
         Ok(None)

@@ -13,12 +13,11 @@ impl Db {
         }
     }
 
-    pub fn run_command(&self, cmd: &dyn Command) -> Option<RespType> {
-        cmd.execute(self);
-        None
+    pub fn run_command(&self, cmd: &dyn Command) -> Result<Option<RespType>, ()> {
+        cmd.execute(self)
     }
 }
 
-pub trait Command: Debug {
+pub trait Command: Debug + Send {
     fn execute(&self, db: &Db) -> Result<Option<RespType>, ()>;
 }

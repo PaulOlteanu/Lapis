@@ -2,9 +2,11 @@ use lapis_resp::RespType;
 
 pub mod get;
 pub mod set;
+pub mod ping;
 
 use get::Get;
 use set::Set;
+use ping::Ping;
 
 use crate::db::Command;
 
@@ -39,6 +41,12 @@ pub fn from_resp(resp: &RespType) -> Result<Box<dyn Command>, ()> {
             "get" => {
                 if let Some(get) = Get::new(&unwrapped[1..]) {
                     return Ok(Box::new(get));
+                }
+            }
+
+            "ping" => {
+                if let Some(ping) = Ping::new(&unwrapped[1..]) {
+                    return Ok(Box::new(ping));
                 }
             }
 
